@@ -1,0 +1,7 @@
+{
+    "installOptions" : {
+        "installDependencies" : true,
+        "installFromRepository" : true,
+        "libraryPath" : "C:/Users/cpontet/OneDrive - terresinovia.fr/Mes Documents/R/win-library/3.5"
+    }
+}

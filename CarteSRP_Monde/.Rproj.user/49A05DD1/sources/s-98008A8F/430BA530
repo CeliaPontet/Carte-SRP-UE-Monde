@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1535718787911.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "430BA530",
+    "lastKnownWriteTime" : 2338324013718332974,
+    "last_content_update" : 1535718787911,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "AA6B1B13",
+        "caption" : "countries",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=countries&cache_key=AA6B1B13",
+        "displayedObservations" : 14,
+        "environment" : "",
+        "object" : "countries",
+        "preview" : 0,
+        "totalObservations" : 14,
+        "variables" : 71
+    },
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

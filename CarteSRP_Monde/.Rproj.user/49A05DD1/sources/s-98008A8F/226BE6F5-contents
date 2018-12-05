@@ -1,0 +1,117 @@
+---
+title: "Création des données SRP Monde"
+author: "Celia Pontet"
+date: "`r format(Sys.Date(),'%d/%m/%Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+Ce script permet de créer les données d'entrée de l'application CartoSRP, à partir de l'ensemble des fichiers excel rassemblant les données.  
+
+# Packages
+
+Ce script utilise un ensemble de packages dont `srpdata` qui est un package que j'ai créé. Il contient notamment une fonction `import_srp`, utilisée sur chaque fichier excel pour importer les données.
+
+```{r}
+rm(list=ls())
+library(srpdata)
+library(readxl)
+library(tidyverse)
+library(sf)
+library(glue)
+library(ggplot2)
+library(gdata)
+library(plotly)
+```
+
+
+#Import des données culture par culture
+
+```{r}
+#---------------------------------------------------------------------------------------
+#COLZA UE
+excel_sheets("DATA/OLEAUE.xls")
+colza <- import_srp_monde(path="./DATA/OLEAUE.xls",
+                    sheet_surf = "SurfColza", 
+                    sheet_prod="ProdColza",
+                    sheet_rdt = "RdtColza",
+                    culture = "Colza d'hiver",
+                    skip = 3, n_max=27)
+
+#---------------------------------------------------------------------------------------
+#SOJA
+soja <- import_srp_monde(path="./DATA/OLEAUE.xls",
+                    sheet_surf = "SurfSoja", 
+                    sheet_prod="ProdSoja",
+                    sheet_rdt = "RdtSoja",
+                    culture = "Soja",
+                    skip = 3, n_max=27)
+#---------------------------------------------------------------------------------------
+#TOURNESOL
+tourn <- import_srp_monde(path="./DATA/OLEAUE.xls",
+                    sheet_surf = "SurfTourn", 
+                    sheet_prod="ProdTourn",
+                    sheet_rdt = "RdtTourn",
+                    culture = "Tournesol",
+                    skip = 3, n_max=27)
+
+#---------------------------------------------------------------------------------------
+#POIS
+excel_sheets("DATA/PROTEAUE.xls")
+pois <- import_srp_monde(path="./DATA/PROTEAUE.xls",
+                    sheet_surf = "SurPois", 
+                    sheet_prod="ProdPois",
+                    sheet_rdt = "RdtPois",
+                    culture = "Pois protéagineux",
+                    skip = 3, n_max=25)
+
+#---------------------------------------------------------------------------------------
+#Feverole
+fev <- import_srp_monde(path="./DATA/PROTEAUE.xls",
+                    sheet_surf = "SurfFev", 
+                    sheet_prod="ProdFev",
+                    sheet_rdt = "RdtFev",
+                    culture = "Féverole",
+                    skip = 3, n_max=25)
+
+#---------------------------------------------------------------------------------------
+#Lupin
+lup <- import_srp_monde(path="./DATA/PROTEAUE.xls",
+                    sheet_surf = "SurfLupin", 
+                    sheet_prod="ProdLupin",
+                    sheet_rdt = "RdtLupin",
+                    culture = "Lupin",
+                    skip = 3, n_max=13)
+
+```
+
+Pour protéagineux, il faudra formater le jeu de données comme celui des oléagineux.  
+
+A ce moment, dans l'environnement, il existe un objet par culture, ayant exactement le même format. Les données Surface, rendemenet et production y sont rassemblées.  
+
+#Mise en forme des données
+
+On va ici :  
+- coller l'ensemble des ces tables  
+
+```{r}
+data_ue <- mget(ls()) %>% 
+  bind_rows()
+
+ref <- read_excel("DATA/ref.xlsx", sheet="UE")
+
+data_ue <- data_ue %>% 
+  full_join(ref, by="PAYS")
+
+data_ue <- data_ue %>% 
+  mutate(UNIT=case_when(
+    CRITERE=="Surface" ~ "1000 ha",
+    CRITERE=="Rendement" ~ "q/ha",
+    TRUE ~ "1000 t"
+  ))
+
+saveRDS(data_ue,file="DATA/data_ue.rds")
+```

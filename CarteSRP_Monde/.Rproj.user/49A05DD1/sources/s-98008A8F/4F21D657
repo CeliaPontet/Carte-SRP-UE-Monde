@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1544019530366.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "4F21D657",
+    "lastKnownWriteTime" : 1540996995,
+    "last_content_update" : 1540996995,
+    "path" : "~/Projets/Applications Shiny/Carte SRP/Carte_SRP/global.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "129,0",
+        "scrollLine" : "110"
+    },
+    "relative_order" : 14,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

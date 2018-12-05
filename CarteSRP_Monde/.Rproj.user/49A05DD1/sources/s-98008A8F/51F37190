@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1544015623204.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2906070321",
+    "id" : "51F37190",
+    "lastKnownWriteTime" : 1544021868,
+    "last_content_update" : 1544021868456,
+    "path" : "~/Projets/Applications Shiny/Carte SRP UE Monde/CarteSRP_Monde/UI.r",
+    "project_path" : "UI.r",
+    "properties" : {
+        "cursorPosition" : "552,51",
+        "scrollLine" : "532",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

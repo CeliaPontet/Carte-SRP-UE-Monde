@@ -1,0 +1,267 @@
+---
+title: "Cartes SRP Monde et UE"
+author: "Celia Pontet"
+date: "`r format(Sys.Date(),'%d/%m/%Y')`"
+output: 
+  word_document:
+    df_print: kable 
+    reference_docx: Template_Word_reference.docx
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rnaturalearth)
+library(sf)
+library(sp)
+library(tidyverse)
+library(glue)
+library(readxl)
+```
+
+#Récupération du fond de carte
+
+Il existe plusieurs niveaux de détails, via l'argument `scale` : 110, 50 ou 10.  
+Pour une carte mondiale, mieux vaut privilégier le niveau 110. Pour une échelle continent, on peut utiliser une échelle plus fine.  
+La carte se récupère grâce à la fonction `ne_countries`.  
+
+```{r}
+w <- ne_countries(scale=50, returnclass = "sf")
+
+ne_countries(scale=110, returnclass = "sf") %>% 
+  ggplot() +
+  geom_sf(fill = "grey", colour = "black") +
+  ggtitle("Scale=110")
+
+ne_countries(scale=50, returnclass = "sf") %>% 
+  ggplot() +
+  geom_sf(fill = "grey", colour = "black") +
+  ggtitle("Scale=50")
+
+ne_countries(scale=10, returnclass = "sf") %>% 
+  ggplot() +
+  geom_sf(fill = "grey", colour = "black") +
+  ggtitle("Scale=10")
+```
+
+On peut faire un filtre directement sur le continent ou le pays.
+
+```{r}
+ne_countries(scale=110, returnclass = "sf",continent = "Europe") %>% 
+  ggplot() +
+  geom_sf(fill = "grey", colour = "black") +
+  ggtitle("Importation du fond de carte avec filtre sur continent")
+
+ne_countries(scale=110, returnclass = "sf",country = "France") %>% 
+  ggplot() +
+  geom_sf(fill = "grey", colour = "black") +
+  ggtitle("Importation du fond de carte avec filtre sur pays")
+```
+
+Effectuer un zoom brut : déforme un peu car aux latitude hautes, il y a moins de distances entre deux longitudes.
+
+```{r}
+ne_countries(scale=110, returnclass = "sf") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black") +
+  coord_sf( xlim = c(-42, 86), ylim = c(12,84))
+```
+
+
+# Changer la projection : 
+##Plan
+```{r}
+#Plan
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")+
+  ggtitle("Défaut = LongLat projection")
+
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_transform("+proj=merc") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")+
+  ggtitle("Mercator projection")
+
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_transform("+proj=mill") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")+
+  ggtitle("Miller projection")
+
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_transform("+proj=gall") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")+
+  ggtitle("Gall projection")
+```
+
+
+##Sphérique
+
+```{r}
+#sphérique
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_transform("+proj=natearth + wktext") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")
+
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_transform("+proj=robin") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")+
+  ggtitle("Robinson projection")
+
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_transform("+proj=moll") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")+
+  ggtitle("Mollweide projection")
+```
+
+##Sphère réelle
+
+```{r}
+latitude_centre <- 52
+longitude_centre <- 10
+
+ne_countries(scale=110, returnclass = "sf") %>% 
+  st_transform(crs = glue("+proj=laea +lat_0={latitude_centre} +lon_0={longitude_centre} +datum=WGS84 +units=m +no_defs")) %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")
+
+
+latitude_centre <- 0
+longitude_centre <- 0
+
+ne_countries(scale=110, returnclass = "sf") %>% 
+  st_transform(w, crs = glue("+proj=laea +lat_0={latitude_centre} +lon_0={longitude_centre} +datum=WGS84 +units=m +no_defs")) %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")
+
+```
+
+
+# Zoom
+
+```{r}
+xlim = c(-4200000, 8600000)
+ylim = c(1200000,8400000)
+
+
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_bbox()
+
+#Accès aux limites
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_transform("+proj=moll") %>% 
+  st_bbox()
+
+ne_countries(scale = 110, returnclass = "sf") %>% 
+  st_transform("+proj=moll") %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")+
+  ggtitle("Mollweide projection & zoom")+
+  coord_sf(xlim=xlim,ylim=ylim)
+```
+
+
+#Zoom + avancé sur sphère
+
+Pour cela, à partir des limites `xlim` et `ylim`, on peut recalculer, un xlim/ylim qui conserverait les proportions : cad planifie la sphère.
+
++a         Semimajor radius of the ellipsoid axis
++b         Semiminor radius of the ellipsoid axis
++datum     Datum name (see `proj -ld`)
++ellps     Ellipsoid name (see `proj -le`)
++lat_0     Latitude of origin
++lat_1     Latitude of first standard parallel
++lat_2     Latitude of second standard parallel
++lat_ts    Latitude of true scale
++lon_0     Central meridian
++over      Allow longitude output outside -180 to 180 range, disables wrapping (see below)
++proj      Projection name (see `proj -l`)
++south     Denotes southern hemisphere UTM zone
++units     meters, US survey feet, etc.
++x_0       False easting
++y_0       False northing
++zone      UTM zone
+
+
+```{r}
+ne_countries(scale=110, returnclass = "sf") %>% 
+  st_transform(w, crs = glue("+proj=laea +lat_0={latitude_centre} +lon_0={longitude_centre} +datum=WGS84 +units=m +no_defs")) %>% 
+  ggplot() +
+  geom_sf(aes(fill = pop_est), colour = "black")+
+  coord_sf(xlim=xlim,ylim=ylim)
+
+latitude_centre <- 52
+longitude_centre <- 10
+xlim=c(-42, 52)
+ylim=c(20,84)
+
+crsLONGLAT <- "+proj=longlat +datum=WGS84 +no_defs"
+# crsLAEA <- "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +datum=WGS84 +units=m +no_defs"
+crsLAEA <- glue("+proj=laea +lat_0={latitude_centre} +lon_0={longitude_centre} +datum=WGS84 +units=m +no_defs")
+
+# the bouding box polygon in long/lat projection, i.e. axis-aligned
+bb <- st_sfc(
+  st_polygon(list(cbind(
+    xlim[c(1,2,2,1,1)], # x-coordinates (longitudes) of points A,B,C,D
+    ylim[c(1,1,2,2,1)]     # y-coordinates (latitudes) of points A,B,C,D
+  ))),
+  crs = "+proj=longlat +datum=WGS84 +no_defs")
+
+# now in in LAEA projection
+laeabb <- st_transform(bb, crs = crsLAEA)
+
+# the extent of the bounding box in the new projection
+b <- st_bbox(laeabb)
+
+ne_countries(scale=110, returnclass = "sf") %>% 
+  ggplot()+
+  geom_sf(aes(fill = pop_est), colour = "black") +
+  coord_sf(crs = crsLAEA, xlim = c(b["xmin"], b["xmax"]), ylim = c(b["ymin"], b["ymax"]))
+```
+
+#Ajout des données SRP
+
+```{r}
+data_ue <- read_rds("data_ue.rds")
+
+ref <- read_xlsx("ref.xlsx") %>% 
+  mutate(PAYS = case_when(
+    is.na(PAYS) ~ name,
+    TRUE ~ PAYS
+  ))
+
+# data_ue <- data_ue %>% 
+#   full_join(ref,by="PAYS") %>% 
+#   select(-PAYS) %>% 
+#   filter(!is.na(CULTURE),!is.na(ANNEE),!is.na(name)) %>% 
+#   complete(name,CRITERE,ANNEE,CULTURE)
+
+data <- data_ue %>% 
+  filter(ANNEE==2017,CULTURE=="Colza d'hiver",CRITERE=="Surface", UE=="UE à 12")%>% 
+  full_join(ref,by="PAYS") %>% 
+  select(-PAYS) %>% 
+  filter(!is.na(CULTURE),!is.na(ANNEE),!is.na(name)) %>% 
+  complete(name,ANNEE,CULTURE)
+
+
+
+ne_countries(scale=110, returnclass = "sf") %>% 
+  st_transform("+proj=merc") %>% 
+  full_join(data,by="name") %>%
+  ggplot()+
+  geom_sf(aes(fill=VALUE))+
+  coord_sf(xlim=c(-3000000, 4000000),ylim=c(4000000,11000000))
+
+
+ne_countries(scale=50, returnclass = "sf") %>% 
+  st_transform("+proj=robin") %>% 
+  full_join(data,by="name") %>%
+  ggplot()+
+  geom_sf(aes(fill=VALUE))+
+  coord_sf(xlim=c(-1500000, 3000000),ylim=c(3500000,7500000))
+```
+
