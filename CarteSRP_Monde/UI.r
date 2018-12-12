@@ -24,7 +24,7 @@ shinyUI(
                   hr(),
                   
                   #Sélection du critère
-                  radioButtons("critere",label = "Critère",choices = data_ue %>% distinct(CRITERE) %>% arrange(CRITERE) %>% pull(CRITERE)),
+                  radioButtons("critere",label = "Critère",choices = data_ue %>% distinct(CRITERE) %>% arrange(CRITERE) %>% pull(CRITERE), selected = "Surface"),
                   
                   #Sélection culture
                   selectInput(
@@ -63,7 +63,7 @@ shinyUI(
                   # ),
                   
                   #Sélection du niveau des données
-                  selectInput("niveau", label = "Niveau", choices = data_ue %>% distinct(UE) %>% pull(UE), selected = "UE à 12" ),
+                  selectInput("niveau", label = "Niveau", choices = data_ue %>% distinct(UE) %>% pull(UE), selected = "UE à 28" ),
                   
                   # Logo + phrase + reseaux sociaux
                   br(),br(),br(),br(),
@@ -565,28 +565,46 @@ shinyUI(
                                         
                                         
                                         
+                                        ########### Fond de carte #############
+                                        
+                                        tabPanel("Fond",
+                                                 h3("Résolution"),
+                                                 radioButtons(inputId = "resolution.sheet.4",
+                                                              label = "Résolution du fond de carte",
+                                                              choices=c("Faible"="li","Moyenne"="low","Forte"="high"),
+                                                              selected = "low"),
+                                                 hr(),
+                                                 h3("Projection"),
+                                                 selectInput("projection.sheet.4",
+                                                             "Projection",
+                                                             choices = list(
+                                                               Plan = c("LongLat"="+proj=longlat"))),
+                                                 # selectInput("projection.sheet.4",
+                                                 #             "Projection", 
+                                                 #             choices = list(
+                                                 #               Plan = c("LongLat"="+proj=longlat", "Mercator"="+proj=merc", "Miller"="+proj=mill", "Gall" = "+proj=gall"),
+                                                 #               Sphérique = c("+proj=natearth + wktext", "+proj=robin"),# "Mollweide"="+proj=moll"),
+                                                 #               Sphère = c("Sphère réelle"="Sphère réelle")),
+                                                 #             selected="+proj=lonlat"),
+                                                 # sliderInput(inputId="sphere.long.sheet.4", label="Longitude centrée", min= 0, max=360, value=0),
+                                                 # sliderInput(inputId="sphere.lat.sheet.4", label="Latitude centrée", min=-100, max=100, value=0),
+                                                 h3("Limites"),
+                                                 sliderInput("xlim.sheet.4", label="X", min=0, max=1, value=c(0,0)),
+                                                 sliderInput("ylim.sheet.4", label="Y", min=0, max=1, value=c(0,0))
+                                        ),
+                                        
                                         ########### Echelle #############
                                         
                                         tabPanel("Echelle",
-                                                 h3("Type d'échelle"),
-                                                 radioButtons("type.echelle.sheet.4",
-                                                              label=NULL,
-                                                              choices=c("Continue","Discrète"),inline = TRUE),
-                                                 hr(),
                                                  h3("Echelle"),
-                                                 fluidRow(column(3,numericInput("nb.interv.sheet.4","Nombre d'intervalles",min=1,value=5))),
-                                                 textInput("interv.sheet.4","Indiquer les interavalles souhaités",value=paste(rep(0,5),collapse = "/")),
-                                                 fluidRow(column(4,actionButton("decoupage.auto.sheet.4","Découpage auto")),
-                                                          column(8,tableOutput("effectifs.sheet.4"))),
                                                  fluidRow(
-                                                   column(4,hidden(radioButtons("leg.ajust.sheet.4","Ajustement de l'échelle", choices=c("Echelle ajustée aux données","Echelle personnalisée"),inline = FALSE))),
-                                                   column(6,tableOutput("summary4"))),
+                                                   hidden(radioButtons("leg.ajust.sheet.4","Ajustement de l'échelle", choices=c("Echelle ajustée aux données","Echelle personnalisée"),inline = FALSE)),
+                                                   tableOutput("summary4")),
                                                  
                                                  fluidRow(
                                                    column(4,
                                                           fluidRow(numericInput("leg.gamme.min.sheet.4","Minimum",value=NULL)),
-                                                          fluidRow(numericInput("leg.gamme.max.sheet.4","Maximum",value=NULL)),
-                                                          fluidRow(actionButton("maj.gamme.sheet.4","Valider la gamme"))
+                                                          fluidRow(numericInput("leg.gamme.max.sheet.4","Maximum",value=NULL))
                                                    )),
                                                  
                                                  hr(),
@@ -611,7 +629,7 @@ shinyUI(
                                                  fluidRow(
                                                    column(6,hidden(pickerInput(
                                                      inputId = "palette.brewer.sheet.4", label = "Palette de couleur",
-                                                     choices = colors_pal$Sequential, selected = "GnBu", width = "100%",
+                                                     choices = colors_pal$Sequential, selected = "YlOrRd", width = "100%",
                                                      choicesOpt = list(
                                                        content = sprintf(
                                                          "<div style='width:100%%;padding:5px;border-radius:4px;background:%s;color:%s'>%s</div>",
@@ -632,8 +650,7 @@ shinyUI(
                                                    column(6,colourInput("couleur2.map.sheet.4","Couleur élevé",value = "#00868B"))
                                                  ),
                                                  fluidRow(
-                                                   column(6,plotOutput("demo.palette.sheet.4",width = 300,height = 50)),
-                                                   column(6,actionButton("valider.palette.sheet.4","Valider la palette"))
+                                                   column(6,plotOutput("demo.palette.sheet.4",width = 300,height = 50))
                                                  ),
                                                  hr(),
                                                  h3("Données manquantes"),
@@ -642,10 +659,10 @@ shinyUI(
                                                  h3("Contours"),
                                                  fluidRow(
                                                    column(4,colourInput("col.contour.sheet.4",
-                                                                        "Couleur",value = "#B8ADAD")),
+                                                                        "Couleur",value = "#050505")),
                                                    column(4,sliderInput("lwd.contour.sheet.4",
                                                                         label="Epaisseur",
-                                                                        min=0,max=1,value=0.2,step = 0.05))
+                                                                        min=0,max=1,value=0.05,step = 0.05))
                                                  )
                                                  
                                         ),
@@ -698,10 +715,10 @@ shinyUI(
                                                  h3("Source"),
                                                  textInput(inputId="text1.source.sheet.4",
                                                            label="Modifier la source (1ère ligne)",
-                                                           value="Source : Terres Inovia et Terres Univia d'après les données d'Agreste"),
+                                                           value=""),
                                                  textInput(inputId="text2.source.sheet.4",
                                                            label="Modifier la source (2nde ligne)",
-                                                           value="(Ministère de l'Agriculture et de l'Alimentation)"),
+                                                           value=""),
                                                  fluidRow(
                                                    column(3,sliderInput("taille.source.sheet.4",
                                                                         label="Taille",
@@ -760,10 +777,10 @@ shinyUI(
                                                                                value=0.15,min=0,max=0.5,step=0.01))),
                                                    column(4,hidden(sliderInput("posx.logo.ti.sheet.4",
                                                                                label="Position X",
-                                                                               value=900310,min=90000,max=1300000,step=1))),
+                                                                               value=900310,min=90000,max=1300000,step=1000))),
                                                    column(4,hidden(sliderInput("posy.logo.ti.sheet.4",
                                                                                label="Position Y",
-                                                                               value=7200660,min=6000000,max=7500000,step=1)))),
+                                                                               value=7200660,min=6000000,max=7500000,step=1000)))),
                                                  hr(),
                                                  h3("Logo TU"),
                                                  checkboxInput("logo.tu.sheet.4","Afficher le logo Terres Univia",value=TRUE),
@@ -773,10 +790,11 @@ shinyUI(
                                                                                value=0.15,min=0,max=0.5,step=0.01))),
                                                    column(4,hidden(sliderInput("posx.logo.tu.sheet.4",
                                                                                label="Position X",
-                                                                               value=1080310,min=90000,max=1300000,step=1))),
+                                                                               value=1080310,min=90000,max=1300000,step=1000))),
                                                    column(4,hidden(sliderInput("posy.logo.tu.sheet.4",
                                                                                label="Position Y",
-                                                                               value=7200660,min=6000000,max=7500000,step=1))))),
+                                                                               value=7200660,min=6000000,max=7500000,step=1000))))
+                                                 ),
                                         
                                         ############### Autre ###########
                                         
@@ -819,291 +837,306 @@ shinyUI(
         # ----------------------
         
         
-        tabItem(tabName = "Carte_evol"#,
-                # helpText("Créez votre graphique d'évolution" , style="color:orange ; font-family: 'times'; font-size:24pt ; font-type:bold",align="left"),
-                # fluidRow(
-                #   box(title="Paramétrage",status="primary",solidHeader=TRUE,width=12,collapsible=TRUE,
-                #       column(2,
-                #              fluidRow(
-                #                numericInput("annee1.sheet.5",label="Année 1",value=max(data_srp$ANNEE,na.rm=TRUE)-1,min=min(data_srp$ANNEE,na.rm=TRUE),max=max(data_srp$ANNEE)),
-                #                numericInput("annee2.sheet.5",label="Année 2",value=max(data_srp$ANNEE,na.rm=TRUE),min=min(data_srp$ANNEE,na.rm=TRUE),max=max(data_srp$ANNEE)),
-                #                # radioButtons("type.evolution.sheet.5","Représenter l'évolution :",choices=c("En pourcentage"="pourc","Brute"="brute"))
-                #                radioGroupButtons(
-                #                  inputId = "type.evolution.sheet.5",
-                #                  label = "Représenter l'évolution :", 
-                #                  choices = c("En pourcentage"="pourc","Brute"="brute"),
-                #                  status = "primary"
-                #                ))
-                #       ),
-                #       column(10,
-                #              selectInput("choix.entite.sheet.5", "Sélectionnez les entités géographiques à représenter",
-                #                          choices = data_srp %>% filter(NIVEAU=="Département") %>% distinct(ENTITE) %>% pull(),
-                #                          selected = data_srp %>% filter(NIVEAU=="Département") %>% distinct(ENTITE) %>% pull(),
-                #                          multiple =T),
-                #              # actionButton("valider.entite.sheet.5","Valider"),
-                #              materialSwitch(inputId = "corse.sheet.5",label = "Corse",value = FALSE,status = "primary"))
-                #       # checkboxInput("corse.sheet.5","Afficher la Corse",value=FALSE))
-                #   )
-                # ),
-                # fluidRow(
-                #   column(6,
-                #          box(title="Carte & Données",status="primary",solidHeader=TRUE,width=12,collapsible=TRUE,
-                #              tabBox(width=12,
-                #                     tabPanel("Carte",
-                #                              column(12,plotOutput("map.sheet.5",width="100%",height="480px", click = "plot5_click")),
-                #                              fluidRow(
-                #                                column(1,dropdownButton(circle = TRUE, status = "primary", icon = icon("question"), size = "xs","Pour assurer une excellente qualité, choisir pdf ou tiff.")),
-                #                                column(5,radioButtons(inputId="save.type.sheet.5",label="Type de fichier",choices=list("pdf","png","jpeg","tiff"),inline=TRUE))
-                #                              ),
-                #                              
-                #                              downloadButton(outputId="down.sheet.5",label="Telecharger la carte")
-                #                              # plotlyOutput("map.sheet.5",width="100%",height="480px"),
-                #                              # ggiraphOutput("map.sheet.5",width="100%",height="480px"),
-                #                     ),
-                #                     tabPanel("Données",
-                #                              dataTableOutput("df.sheet.5",width="60%"),
-                #                              downloadButton("downloadData.sheet.5", "Téléchager les données (.csv)")
-                #                     )
-                #              )
-                #          )
-                #   ),
-                #   column(6,
-                #          fluidRow(
-                #            box(title="Modifier les paramètres graphiques",status="primary",solidHeader=TRUE,width=12,collapsible=TRUE,
-                #                tabBox(width=12,
-                #                       
-                #                       
-                #                       
-                #                       ########### Echelle #############
-                #                       
-                #                       tabPanel("Echelle",
-                #                                h3("Type d'échelle"),
-                #                                radioButtons("type.echelle.sheet.5",
-                #                                             label=NULL,
-                #                                             choices=c("Continue","Discrète"),inline = TRUE),
-                #                                hr(),
-                #                                h3("Echelle"),
-                #                                fluidRow(column(2,numericInput("nb.interv.sheet.5","Nombre d'intervalles",min=1,value=5))),
-                #                                textInput("interv.sheet.5","Indiquer les interavalles souhaités",value=paste(rep(0,5),collapse = "/")),
-                #                                fluidRow(column(4,actionButton("decoupage.auto.sheet.5","Découpage auto")),
-                #                                         column(8,tableOutput("effectifs.sheet.5"))),
-                #                                fluidRow(
-                #                                  column(4,hidden(radioButtons("leg.ajust.sheet.5","Ajustement de l'échelle", choices=c("Echelle ajustée aux données","Echelle personnalisée"),inline = TRUE))),
-                #                                  column(6,tableOutput("summary5"))),
-                #                                fluidRow(
-                #                                  column(4,numericInput("leg.gamme.min.sheet.5","Minimum",value=NULL)),
-                #                                  column(4,numericInput("leg.gamme.max.sheet.5","Maximum",value=NULL)),
-                #                                  column(4,actionButton("maj.gamme.sheet.5","Valider la gamme"))
-                #                                ),
-                #                                hr(),
-                #                                h3("Habillage texte"),
-                #                                checkboxInput("ajout.text.sheet.5","Ajouter les valeurs sur la carte", value = FALSE),
-                #                                fluidRow(
-                #                                  column(4,numericInput("taille.text.sheet.5","Taille",min=0,max=20,value=2.5,step = 0.25)),
-                #                                  column(4,numericInput("nb.dec.sheet.5","Nombre de décimales",value=0,step=1)),
-                #                                  column(4,colourInput("col.text.sheet.5","Couleur",value="#665E5E"))
-                #                                )
-                #                       ),
-                #                       
-                #                       ########### Couleurs #############
-                #                       
-                #                       tabPanel("Couleurs",
-                #                                h3("Palette"),
-                #                                radioButtons("mode.couleur.sheet.5",label=NULL,choices=c("Palette prédéfinie"="Palette", "Gradient personnalisé"="Gradient"),inline = TRUE),
-                #                                hr(),
-                #                                
-                #                                fluidRow(
-                #                                  column(6,hidden(
-                #                                    pickerInput(
-                #                                      inputId = "palette.brewer.sheet.5", label = "Palette de couleur",
-                #                                      choices = colors_pal[c(1,3)], selected = "RdYlGn", width = "100%",
-                #                                      choicesOpt = list(
-                #                                        content = sprintf(
-                #                                          "<div style='width:100%%;padding:5px;border-radius:4px;background:%s;color:%s'>%s</div>",
-                #                                          unname(background_pals[c(1:9,18:35)]), colortext_pals[c(1:9,18:35)], names(background_pals[c(1:9,18:35)])
-                #                                        )
-                #                                      )
-                #                                    )
-                #                                    # selectInput("palette.brewer.sheet.5",
-                #                                    #                           label="Palette de couleur",
-                #                                    #                           choices=c("BuGn : blanc>VERT"="BuGn","BuPu : blanc>VIOLET"="BuPu","GnBu : vert>BLEU"="GnBu","Greens : Verts"="Greens","Greys : Gris"="Greys","Oranges"="Oranges","OrRd : orange>ROUGE"="OrRd","PuBu : violet>BLEU"="PuBu","PuBuGn : violet>Bleu>VERT"="PuBuGn","PuRd : violet>ROUGE"="PuRd","Purples : Violets"="Purples","RdPu : rouge>VIOLET"="RdPu","Reds : Rouges"="Reds","YlGn : jaune>VERT"="YlGn","YlGnBu : jaune>Vert>BLEU"="YlGnBu","YlOrBr : jaune>Orange>BRUN"="YlOrBr","YlOrRd : jaune>Orange>ROUGE"="YlOrRd","BrBG : BRUN>blanc>VERT"="BrBG","PiYG : ROSE>jaune>VERT"="PiYG","PRGn : VIOLET>blanc>VERT"="PRGn","PuOr : ORANGE>blanc>VIOLET"="PuOr","RdBu : ROUGE>blanc>BLEU"="RdBu","RdGy : ROUGE>blanc>GRIS"="RdGy","RdYlBu : ROUGE>jaune>BLEU"="RdYlBu","RdYlGn : ROUGE>jaune>VERT"="RdYlGn","Spectral : ROUGE>jaune>vert>BLEU"="Spectral")[26:18],
-                #                                    #                           selected="RdYlGn")
-                #                                  )),
-                #                                  column(6,hidden(radioButtons("palette.direction.sheet.5",
-                #                                                               "Direction de la palette",
-                #                                                               choices=c("Origine"=1, "Inverse"=-1))))
-                #                                ),
-                #                                fluidRow(
-                #                                  column(4,colourInput("couleur1.map.sheet.5","Couleur négative",value = "#CD3333")),
-                #                                  column(4,colourInput("couleur2.map.sheet.5","Couleur nulle",value = "#FFF8DC")),
-                #                                  column(4,colourInput("couleur3.map.sheet.5","Couleur positive",value = "#00868B"))
-                #                                ),
-                #                                fluidRow(
-                #                                  column(6,plotOutput("demo.palette.sheet.5",width = 300,height = 50)),
-                #                                  column(6,actionButton("valider.palette.sheet.5","Valider la palette"))
-                #                                ),
-                #                                hr(),
-                #                                h3("Données manquantes"),
-                #                                fluidRow(column(4,colourInput("col.na.sheet.5","Couleur des NA",value = "#B8ADAD"))),
-                #                                hr(),
-                #                                h3("Contours"),
-                #                                fluidRow(
-                #                                  column(4,colourInput("col.contour.sheet.5",
-                #                                                       "Couleur",value = "#B8ADAD")),
-                #                                  column(4,sliderInput("lwd.contour.sheet.5",
-                #                                                       label="Epaisseur",
-                #                                                       min=0,max=1,value=0.2,step = 0.05))
-                #                                )
-                #                                
-                #                       ),
-                #                       
-                #                       
-                #                       ############ Titre #############
-                #                       tabPanel("Titre",
-                #                                h3("Titre"),
-                #                                textInput(inputId="titre.sheet.5",
-                #                                          label="Titre",
-                #                                          value=NULL),
-                #                                fluidRow(
-                #                                  column(3,sliderInput("taille.titre.sheet.5",
-                #                                                       label="Taille",
-                #                                                       value=14,min=0,max=32,step=1)),
-                #                                  column(3,sliderInput("alignement.titre.sheet.5",
-                #                                                       label="Alignement",
-                #                                                       value=0,min=0,max=1,step=0.1)),
-                #                                  column(2,colourInput("couleur.titre.sheet.5",
-                #                                                       "Couleur",
-                #                                                       "#665E5E",returnName = TRUE)),
-                #                                  
-                #                                  column(4,radioButtons("style.titre.sheet.5",
-                #                                                        "Style",
-                #                                                        choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic")))
-                #                                ),
-                #                                hr(),
-                #                                h3("Sous-titre"),
-                #                                textInput(inputId="sous.titre.sheet.5",
-                #                                          label="Sous-titre",
-                #                                          value=NULL),
-                #                                fluidRow(
-                #                                  column(3,sliderInput("taille.sous.titre.sheet.5",
-                #                                                       label="Taille",
-                #                                                       value=11,min=0,max=32,step=1)),
-                #                                  column(3,sliderInput("alignement.sous.titre.sheet.5",
-                #                                                       label="Alignement",
-                #                                                       value=0,min=0,max=1,step=0.1)),
-                #                                  column(2,colourInput("couleur.sous.titre.sheet.5",
-                #                                                       "Couleur",
-                #                                                       "#665E5E",returnName = TRUE)),
-                #                                  
-                #                                  column(4,radioButtons("style.sous.titre.sheet.5",
-                #                                                        "Style",
-                #                                                        choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic")))
-                #                                ),
-                #                                hr(),
-                #                                h3("Source"),
-                #                                textInput(inputId="text1.source.sheet.5",
-                #                                          label="Modifier la source (1ère ligne)",
-                #                                          value="Source : Terres Inovia et Terres Univia d'après les données d'Agreste"),
-                #                                textInput(inputId="text2.source.sheet.5",
-                #                                          label="Modifier la source (2nde ligne)",
-                #                                          value="(Ministère de l'Agriculture et de l'Alimentation)"),
-                #                                fluidRow(
-                #                                  column(3,sliderInput("taille.source.sheet.5",
-                #                                                       label="Taille",
-                #                                                       value=8,min=0,max=32,step=1)),
-                #                                  column(3,sliderInput("alignement.source.sheet.5",
-                #                                                       label="Alignement",
-                #                                                       value=1,min=0,max=1,step=0.1)),
-                #                                  column(2,colourInput("couleur.source.sheet.5",
-                #                                                       "Couleur",
-                #                                                       "#665E5E",returnName = TRUE)),
-                #                                  column(4,radioButtons("style.source.sheet.5",
-                #                                                        "Style",
-                #                                                        choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic"),
-                #                                                        selected = "italic"))
-                #                                )
-                #                       ),
-                #                       
-                #                       
-                #                       tabPanel("Légende",
-                #                                h3("Général"),
-                #                                textInput(inputId="leg.titre.sheet.5",
-                #                                          label="Titre de la légende",
-                #                                          value=NULL),
-                #                                radioButtons("leg.position.sheet.5",
-                #                                             label="Position",
-                #                                             choices=c("Droite"="right","Gauche"="left","Haut"="top","bas"="bottom","Aucune"="none"),inline=TRUE),
-                #                                hr(),
-                #                                h3("Titre de la légende"),
-                #                                
-                #                                fluidRow(
-                #                                  column(4,sliderInput("leg.titre.size.sheet.5",label="Taille",value=10,min=0,max=32,step=1)),
-                #                                  column(4,radioButtons("leg.titre.style.sheet.5","Style", choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic"))),
-                #                                  column(4,colourInput("leg.titre.col.sheet.5", "Couleur", "#665E5E",returnName = FALSE))
-                #                                ),
-                #                                hr(),
-                #                                h3("Chiffres de la légende"),
-                #                                fluidRow(
-                #                                  column(4,sliderInput("leg.chiffre.size.sheet.5",
-                #                                                       label="Taille",
-                #                                                       value=8,min=0,max=32,step=1)),
-                #                                  column(4,radioButtons("leg.chiffre.style.sheet.5","Style", choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic"))),
-                #                                  column(4,colourInput("leg.chiffre.col.sheet.5", "Couleur", "#665E5E",returnName = FALSE)))
-                #                       ),
-                #                       ########### Logos TI et météo France ###########
-                #                       
-                #                       
-                #                       tabPanel("Logos",
-                #                                h3("Logo TI"),
-                #                                checkboxInput("logo.ti.sheet.5","Afficher le logo Terres Inovia",value=TRUE),
-                #                                fluidRow(
-                #                                  column(4,hidden(sliderInput("size.logo.ti.sheet.5",
-                #                                                              label="Taille",
-                #                                                              value=0.15,min=0,max=1,step=0.01))),
-                #                                  column(4,hidden(numericInput("posx.logo.ti.sheet.5",
-                #                                                               label="Position X",
-                #                                                               value=900310,min=90000,max=1300000,step=1))),
-                #                                  column(4,hidden(numericInput("posy.logo.ti.sheet.5",
-                #                                                               label="Position Y",
-                #                                                               value=7200660,min=6000000,max=7500000,step=1)))),
-                #                                actionButton("LogoTIclick5","Positionner le logo à l'endroit du dernier click"),
-                #                                verbatimTextOutput("info"),
-                #                                hr(),
-                #                                h3("Logo TU"),
-                #                                checkboxInput("logo.tu.sheet.5","Afficher le logo Terres Univia",value=TRUE),
-                #                                fluidRow(
-                #                                  column(4,hidden(sliderInput("size.logo.tu.sheet.5",
-                #                                                              label="Taille",
-                #                                                              value=0.15,min=0,max=1,step=0.01))),
-                #                                  column(4,hidden(sliderInput("posx.logo.tu.sheet.5",
-                #                                                              label="Position X",
-                #                                                              value=1080310,min=90000,max=1300000,step=1))),
-                #                                  column(4,hidden(sliderInput("posy.logo.tu.sheet.5",
-                #                                                              label="Position Y",
-                #                                                              value=7200660,min=6000000,max=7500000,step=1))))
-                #                       ),
-                #                       
-                #                       tabPanel("Autres",
-                #                                h3("Flèche Nord (en cours de développement)")
-                #                                # checkboxInput("north.arrow.sheet.5","Afficher la flèche nord",value = FALSE),
-                #                                # fluidRow(
-                #                                #   column(2,numericInput("type.north.arrow.sheet.5",
-                #                                #                         label="Type de flèche nord",
-                #                                #                         min=1,max=18,value=3)),
-                #                                #   column(3,sliderInput("taille.north.arrow.sheet.5","Taille",min=0,max=1,value=0.1)),
-                #                                #   column(3,radioButtons("location.north.arrow.sheet.5",
-                #                                #                         "Position",
-                #                                #                         choices=c("Bas-gauche"="bottomleft","Bas-droite"="bottomright","Haut-droite"="topright","Haut-gauche"="topleft")))
-                #                                # ),
-                #                                # plotOutput("north.arrow.symbols5",width = 400,height = 290)
-                #                       )
-                #                       
-                #                       
-                #                ) # Tabbox
-                #            ) # box()
-                #          ) # fluidRow
-                #   ) # column
-                # ) # fluidRow
+        tabItem(tabName = "Carte_evol",
+                helpText("Créez une graphique d'évolution" , style="color:orange ; font-family: 'times'; font-size:24pt ; font-type:bold",align="left"),
+                fluidRow(
+                  box(title="Paramétrage",status="primary",solidHeader=TRUE,width=12,collapsible=TRUE,
+                      column(2,
+                             fluidRow(
+                               numericInput("annee1.sheet.5",label="Année 1",value=max(data_ue$ANNEE,na.rm=TRUE)-1,min=min(data_ue$ANNEE,na.rm=TRUE),max=max(data_ue$ANNEE)),
+                               numericInput("annee2.sheet.5",label="Année 2",value=max(data_ue$ANNEE,na.rm=TRUE),min=min(data_ue$ANNEE,na.rm=TRUE),max=max(data_ue$ANNEE)),
+                               radioGroupButtons(
+                                 inputId = "type.evolution.sheet.5",
+                                 label = "Représenter l'évolution :",
+                                 choices = c("En pourcentage"="POURC_EVOLUTION","Brute"="EVOLUTION"),
+                                 status = "primary"
+                               ))
+                      ),
+                      column(10,
+                             selectInput("choix.entite.sheet.5", "Sélectionnez les entités géographiques à représenter",
+                                         choices = data_ue %>% distinct(PAYS) %>% pull(),
+                                         selected = data_ue %>% distinct(PAYS) %>% pull(),
+                                         multiple =T))
+                  ),
+                  fluidRow(
+                    column(6,
+                           box(title="Carte & Données",status="primary",solidHeader=TRUE,width=12,collapsible=TRUE,
+                               tabBox(width=12,
+                                      tabPanel("Carte",
+                                               column(12,plotOutput("map.sheet.5",width="100%",height="480px", click = "plot5_click")),
+                                               fluidRow(
+                                                 column(1,dropdownButton(circle = TRUE, status = "primary", icon = icon("question"), size = "xs","Pour assurer une excellente qualité, choisir pdf ou tiff.")),
+                                                 column(5,radioButtons(inputId="save.type.sheet.5",label="Type de fichier",choices=list("pdf","png","jpeg","tiff"),inline=TRUE))
+                                               ),
+                                               
+                                               downloadButton(outputId="down.sheet.5",label="Telecharger la carte")
+                                               # plotlyOutput("map.sheet.5",width="100%",height="480px"),
+                                               # ggiraphOutput("map.sheet.5",width="100%",height="480px"),
+                                      ),
+                                      tabPanel("Données",
+                                               DT::dataTableOutput("df.sheet.5",width="60%"),
+                                               downloadButton("downloadData.sheet.5", "Téléchager les données (.csv)")
+                                      )
+                               )
+                           )
+                    ),
+                    column(6,
+                           fluidRow(
+                             box(title="Modifier les paramètres graphiques",status="primary",solidHeader=TRUE,width=12,collapsible=TRUE,
+                                 tabBox(width=12,
+
+                                        ########### Fond de carte #############
+                                        
+                                        tabPanel("Fond",
+                                                 h3("Résolution"),
+                                                 radioButtons(inputId = "resolution.sheet.5",
+                                                              label = "Résolution du fond de carte",
+                                                              choices=c("Faible"="li","Moyenne"="low","Forte"="high"),
+                                                              selected = "low"),
+                                                 hr(),
+                                                 h3("Projection"),
+                                                 selectInput("projection.sheet.5",
+                                                             "Projection",
+                                                             choices = list(
+                                                               Plan = c("LongLat"="+proj=longlat"))),
+                                                 # selectInput("projection.sheet.5",
+                                                 #             "Projection", 
+                                                 #             choices = list(
+                                                 #               Plan = c("LongLat"="+proj=longlat", "Mercator"="+proj=merc", "Miller"="+proj=mill", "Gall" = "+proj=gall"),
+                                                 #               Sphérique = c("+proj=natearth + wktext", "+proj=robin"),# "Mollweide"="+proj=moll"),
+                                                 #               Sphère = c("Sphère réelle"="Sphère réelle")),
+                                                 #             selected="+proj=lonlat"),
+                                                 # sliderInput(inputId="sphere.long.sheet.5", label="Longitude centrée", min= 0, max=360, value=0),
+                                                 # sliderInput(inputId="sphere.lat.sheet.5", label="Latitude centrée", min=-100, max=100, value=0),
+                                                 h3("Limites"),
+                                                 sliderInput("xlim.sheet.5", label="X", min=0, max=1, value=c(0,0)),
+                                                 sliderInput("ylim.sheet.5", label="Y", min=0, max=1, value=c(0,0))
+                                        ),
+
+                                        ########### Echelle #############
+
+                                        tabPanel("Echelle",
+                                                 h3("Echelle"),
+                                                 fluidRow(
+                                                   radioButtons("leg.ajust.sheet.5","Ajustement de l'échelle", choices=c("Echelle ajustée aux données","Echelle personnalisée"),inline = FALSE),
+                                                   tableOutput("summary5")),
+                                                 fluidRow(
+                                                   column(4,
+                                                          fluidRow(numericInput("leg.gamme.min.sheet.5","Minimum",value=NULL)),
+                                                          fluidRow(numericInput("leg.gamme.max.sheet.5","Maximum",value=NULL))
+                                                   )
+                                                 ),
+                                                 hr(),
+                                                 h3("Habillage texte"),
+                                                 checkboxInput("ajout.text.sheet.5","Ajouter les valeurs sur la carte", value = FALSE),
+                                                 fluidRow(
+                                                   column(4,numericInput("taille.text.sheet.5","Taille",min=0,max=20,value=2.5,step = 0.25)),
+                                                   column(4,numericInput("nb.dec.sheet.5","Nombre de décimales",value=0,step=1)),
+                                                   column(4,colourInput("col.text.sheet.5","Couleur",value="#665E5E"))
+                                                 )
+                                        ),
+                                        #                       
+                                        #                       ########### Couleurs #############
+                                        #                       
+                                        tabPanel("Couleurs",
+                                                 h3("Palette"),
+                                                 radioButtons("mode.couleur.sheet.5",label=NULL,choices=c("Palette prédéfinie"="Palette", "Gradient personnalisé"="Gradient"),inline = TRUE),
+                                                 hr(),
+                                                 
+                                                 fluidRow(
+                                                   column(6,hidden(
+                                                     pickerInput(
+                                                       inputId = "palette.brewer.sheet.5", label = "Palette de couleur",
+                                                       choices = colors_pal[c(1,3)], selected = "RdYlGn", width = "100%",
+                                                       choicesOpt = list(
+                                                         content = sprintf(
+                                                           "<div style='width:100%%;padding:5px;border-radius:4px;background:%s;color:%s'>%s</div>",
+                                                           unname(background_pals[c(1:9,18:35)]), colortext_pals[c(1:9,18:35)], names(background_pals[c(1:9,18:35)])
+                                                         )
+                                                       )
+                                                     )
+                                                     # selectInput("palette.brewer.sheet.5",
+                                                     #                           label="Palette de couleur",
+                                                     #                           choices=c("BuGn : blanc>VERT"="BuGn","BuPu : blanc>VIOLET"="BuPu","GnBu : vert>BLEU"="GnBu","Greens : Verts"="Greens","Greys : Gris"="Greys","Oranges"="Oranges","OrRd : orange>ROUGE"="OrRd","PuBu : violet>BLEU"="PuBu","PuBuGn : violet>Bleu>VERT"="PuBuGn","PuRd : violet>ROUGE"="PuRd","Purples : Violets"="Purples","RdPu : rouge>VIOLET"="RdPu","Reds : Rouges"="Reds","YlGn : jaune>VERT"="YlGn","YlGnBu : jaune>Vert>BLEU"="YlGnBu","YlOrBr : jaune>Orange>BRUN"="YlOrBr","YlOrRd : jaune>Orange>ROUGE"="YlOrRd","BrBG : BRUN>blanc>VERT"="BrBG","PiYG : ROSE>jaune>VERT"="PiYG","PRGn : VIOLET>blanc>VERT"="PRGn","PuOr : ORANGE>blanc>VIOLET"="PuOr","RdBu : ROUGE>blanc>BLEU"="RdBu","RdGy : ROUGE>blanc>GRIS"="RdGy","RdYlBu : ROUGE>jaune>BLEU"="RdYlBu","RdYlGn : ROUGE>jaune>VERT"="RdYlGn","Spectral : ROUGE>jaune>vert>BLEU"="Spectral")[26:18],
+                                                     #                           selected="RdYlGn")
+                                                   )),
+                                                   column(6,hidden(radioButtons("palette.direction.sheet.5",
+                                                                                "Direction de la palette",
+                                                                                choices=c("Origine"=1, "Inverse"=-1))))
+                                                 ),
+                                                 fluidRow(
+                                                   column(4,colourInput("couleur1.map.sheet.5","Couleur négative",value = "#CD3333")),
+                                                   column(4,colourInput("couleur2.map.sheet.5","Couleur nulle",value = "#FFF8DC")),
+                                                   column(4,colourInput("couleur3.map.sheet.5","Couleur positive",value = "#00868B"))
+                                                 ),
+                                                 fluidRow(
+                                                   column(6,plotOutput("demo.palette.sheet.5",width = 300,height = 50))
+                                                 ),
+                                                 hr(),
+                                                 h3("Données manquantes"),
+                                                 fluidRow(column(4,colourInput("col.na.sheet.5","Couleur des NA",value = "#B8ADAD"))),
+                                                 hr(),
+                                                 h3("Contours"),
+                                                 fluidRow(
+                                                   column(4,colourInput("col.contour.sheet.5",
+                                                                        "Couleur",value = "#050505")),
+                                                   column(4,sliderInput("lwd.contour.sheet.5",
+                                                                        label="Epaisseur",
+                                                                        min=0,max=1,value=0.05,step = 0.05))
+                                                 )
+                                                 
+                                        ),
+
+
+                                                              ############ Titre #############
+                                        tabPanel("Titre",
+                                                                                h3("Titre"),
+                                                                                textInput(inputId="titre.sheet.5",
+                                                                                          label="Titre",
+                                                                                          value=NULL),
+                                                                                fluidRow(
+                                                                                  column(3,sliderInput("taille.titre.sheet.5",
+                                                                                                       label="Taille",
+                                                                                                       value=14,min=0,max=32,step=1)),
+                                                                                  column(3,sliderInput("alignement.titre.sheet.5",
+                                                                                                       label="Alignement",
+                                                                                                       value=0,min=0,max=1,step=0.1)),
+                                                                                  column(2,colourInput("couleur.titre.sheet.5",
+                                                                                                       "Couleur",
+                                                                                                       "#665E5E",returnName = TRUE)),
+
+                                                                                  column(4,radioButtons("style.titre.sheet.5",
+                                                                                                        "Style",
+                                                                                                        choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic")))
+                                                                                ),
+                                                                                hr(),
+                                                                                h3("Sous-titre"),
+                                                                                textInput(inputId="sous.titre.sheet.5",
+                                                                                          label="Sous-titre",
+                                                                                          value=NULL),
+                                                                                fluidRow(
+                                                                                  column(3,sliderInput("taille.sous.titre.sheet.5",
+                                                                                                       label="Taille",
+                                                                                                       value=11,min=0,max=32,step=1)),
+                                                                                  column(3,sliderInput("alignement.sous.titre.sheet.5",
+                                                                                                       label="Alignement",
+                                                                                                       value=0,min=0,max=1,step=0.1)),
+                                                                                  column(2,colourInput("couleur.sous.titre.sheet.5",
+                                                                                                       "Couleur",
+                                                                                                       "#665E5E",returnName = TRUE)),
+
+                                                                                  column(4,radioButtons("style.sous.titre.sheet.5",
+                                                                                                        "Style",
+                                                                                                        choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic")))
+                                                                                ),
+                                                                                hr(),
+                                                                                h3("Source"),
+                                                                                textInput(inputId="text1.source.sheet.5",
+                                                                                          label="Modifier la source (1ère ligne)",
+                                                                                          value=""),
+                                                                                textInput(inputId="text2.source.sheet.5",
+                                                                                          label="Modifier la source (2nde ligne)",
+                                                                                          value=""),
+                                                                                fluidRow(
+                                                                                  column(3,sliderInput("taille.source.sheet.5",
+                                                                                                       label="Taille",
+                                                                                                       value=8,min=0,max=32,step=1)),
+                                                                                  column(3,sliderInput("alignement.source.sheet.5",
+                                                                                                       label="Alignement",
+                                                                                                       value=1,min=0,max=1,step=0.1)),
+                                                                                  column(2,colourInput("couleur.source.sheet.5",
+                                                                                                       "Couleur",
+                                                                                                       "#665E5E",returnName = TRUE)),
+                                                                                  column(4,radioButtons("style.source.sheet.5",
+                                                                                                        "Style",
+                                                                                                        choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic"),
+                                                                                                        selected = "italic"))
+                                                                                )
+                                        ),
+
+
+                                        tabPanel("Légende",
+                                                 h3("Général"),
+                                                 textInput(inputId="leg.titre.sheet.5",
+                                                           label="Titre de la légende",
+                                                           value=NULL),
+                                                 radioButtons("leg.position.sheet.5",
+                                                              label="Position",
+                                                              choices=c("Droite"="right","Gauche"="left","Haut"="top","bas"="bottom","Aucune"="none"),inline=TRUE),
+                                                 hr(),
+                                                 h3("Titre de la légende"),
+                                                 
+                                                 fluidRow(
+                                                   column(4,sliderInput("leg.titre.size.sheet.5",label="Taille",value=10,min=0,max=32,step=1)),
+                                                   column(4,radioButtons("leg.titre.style.sheet.5","Style", choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic"))),
+                                                   column(4,colourInput("leg.titre.col.sheet.5", "Couleur", "#665E5E",returnName = FALSE))
+                                                 ),
+                                                 hr(),
+                                                 h3("Chiffres de la légende"),
+                                                 fluidRow(
+                                                   column(4,sliderInput("leg.chiffre.size.sheet.5",
+                                                                        label="Taille",
+                                                                        value=8,min=0,max=32,step=1)),
+                                                   column(4,radioButtons("leg.chiffre.style.sheet.5","Style", choices=c("Normal"="plain", "Italique"="italic", "Gras"="bold", "Gras Italique"="bold.italic"))),
+                                                   column(4,colourInput("leg.chiffre.col.sheet.5", "Couleur", "#665E5E",returnName = FALSE)))
+                                        ),
+                                        
+                                        
+                                                              ########### Logos TI et TU ###########
+
+
+                                        tabPanel("Logos",
+                                                 h3("Logo TI"),
+                                                 checkboxInput("logo.ti.sheet.5","Afficher le logo Terres Inovia",value=TRUE),
+                                                 fluidRow(
+                                                   column(4,hidden(sliderInput("size.logo.ti.sheet.5",
+                                                                               label="Taille",
+                                                                               value=0.15,min=0,max=1,step=0.01))),
+                                                   column(4,hidden(sliderInput("posx.logo.ti.sheet.5",
+                                                                                label="Position X",
+                                                                                value=900310,min=90000,max=1300000,step=1))),
+                                                   column(4,hidden(sliderInput("posy.logo.ti.sheet.5",
+                                                                                label="Position Y",
+                                                                                value=7200660,min=6000000,max=7500000,step=1)))),
+                                                 # actionButton("LogoTIclick5","Positionner le logo à l'endroit du dernier click"),
+                                                 verbatimTextOutput("info"),
+                                                 hr(),
+                                                 h3("Logo TU"),
+                                                 checkboxInput("logo.tu.sheet.5","Afficher le logo Terres Univia",value=TRUE),
+                                                 fluidRow(
+                                                   column(4,hidden(sliderInput("size.logo.tu.sheet.5",
+                                                                               label="Taille",
+                                                                               value=0.15,min=0,max=1,step=0.01))),
+                                                   column(4,hidden(sliderInput("posx.logo.tu.sheet.5",
+                                                                               label="Position X",
+                                                                               value=1080310,min=90000,max=1300000,step=1))),
+                                                   column(4,hidden(sliderInput("posy.logo.tu.sheet.5",
+                                                                               label="Position Y",
+                                                                               value=7200660,min=6000000,max=7500000,step=1))))
+                                        ),
+                                        #                       
+                                        tabPanel("Autres"
+                                                 #                                h3("Flèche Nord (en cours de développement)")
+                                                 #                                # checkboxInput("north.arrow.sheet.5","Afficher la flèche nord",value = FALSE),
+                                                 #                                # fluidRow(
+                                                 #                                #   column(2,numericInput("type.north.arrow.sheet.5",
+                                                 #                                #                         label="Type de flèche nord",
+                                                 #                                #                         min=1,max=18,value=3)),
+                                                 #                                #   column(3,sliderInput("taille.north.arrow.sheet.5","Taille",min=0,max=1,value=0.1)),
+                                                 #                                #   column(3,radioButtons("location.north.arrow.sheet.5",
+                                                 #                                #                         "Position",
+                                                 #                                #                         choices=c("Bas-gauche"="bottomleft","Bas-droite"="bottomright","Haut-droite"="topright","Haut-gauche"="topleft")))
+                                                 #                                # ),
+                                                 #                                # plotOutput("north.arrow.symbols5",width = 400,height = 290)
+                                        )
+                                        #                       
+                                        #                       
+                                 ) # Tabbox
+                             ) # box()
+                           ) # fluidRow
+                    )# column
+                  ) # fluidRow
+                ) # fluidRow
         ) # TabItem 5 (5)
       ) # TabItems (4)
     ) # dashboardBody (3)

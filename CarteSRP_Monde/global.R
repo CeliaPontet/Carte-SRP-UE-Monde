@@ -7,24 +7,39 @@ library(sp)
 
 library(png)
 
-library(rnaturalearth)
+library(rworldmap)
+library(rworldxtra)
+library(sf)
 library(grid)
 
 library(tidyverse)
+library(readxl)
+library(glue)
 
 data_ue <- read_rds("DATA/data_ue.rds")
 
+data_ue %>% 
+  filter(CRITERE=="Surface", CULTURE=="Colza d'hiver", UE=="UE à 28") %>% 
+  mutate(TOOLTIP=paste(PAYS,"\n",ANNEE,"\n",VALUE,UNIT,sep="")) %>% 
+      group_by(CRITERE, ANNEE, CULTURE, UNIT, UE) %>% 
+      summarise(VALUE=sum(VALUE))
+
+
 ref <- read_excel("DATA/ref.xlsx", sheet="ref") %>% 
   mutate(PAYS = case_when(
-    is.na(PAYS) ~ name,
+    is.na(PAYS) ~ NAME,
     TRUE ~ PAYS
   ))
 
 ti <- readPNG("./DATA/LogoTI.png")
 tu <- readPNG("./DATA/LogoTU.png")
 
-
-
+fond_li <- getMap(resolution="li") %>% 
+  st_as_sf()
+fond_low <- getMap(resolution="low") %>% 
+  st_as_sf()
+fond_high <- getMap(resolution="high") %>% 
+  st_as_sf()
 
 ######################
 # Couleurs
